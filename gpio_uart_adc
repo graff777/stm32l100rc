@@ -1,0 +1,74 @@
+#include "stm32l1xx.h"
+#include "stdio.h"
+
+uint16_t delay_count=0;
+void SysTick_Handler(void)
+{
+  if(delay_count>0)
+  {
+    delay_count--;
+  }
+} 
+  void delay_ms(uint16_t delay_temp)
+{
+  delay_count=delay_temp;
+  while(delay_count){}
+}
+GPIO_InitTypeDef  GPIO_InitStructure;
+ADC_InitTypeDef ADC_InitStructure;
+USART_InitTypeDef USART_InitStructure;
+
+void GPIO_Ini()
+{
+  RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOC, ENABLE);
+  //GPIO_DeInit(GPIOC);
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+  GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_40MHz;
+  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+  GPIO_Init(GPIOC, &GPIO_InitStructure); 
+}
+
+void ADC_Ini()
+{
+  RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);
+  ADC_InitStructure.ADC_Resolution = ADC_Resolution_12b;
+  ADC_InitStructure.ADC_ScanConvMode = ENABLE;
+  ADC_InitStructure.ADC_ContinuousConvMode = ENABLE;
+  ADC_InitStructure.ADC_ExternalTrigConvEdge = ADC_ExternalTrigConvEdge_None;
+  ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Right;
+  ADC_InitStructure.ADC_NbrOfConversion = 1;
+  ADC_Init(ADC1, &ADC_InitStructure);
+ }
+
+void USART_Ini()
+{
+  RCC_APB2PeriphResetCmd(RCC_APB2Periph_USART1, ENABLE);
+  USART_InitStructure.USART_BaudRate = 9600;
+  USART_InitStructure.USART_WordLength = USART_WordLength_8b;
+  USART_InitStructure.USART_StopBits = USART_StopBits_1;
+  USART_InitStructure.USART_Parity = USART_Parity_No;
+  USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+  USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
+  USART_Init(USART1, &USART_InitStructure);
+}
+int main()
+{ 
+  
+  RCC_ClocksTypeDef RCC_Clocks;
+  RCC_GetClocksFreq(&RCC_Clocks);
+  SysTick_Config(RCC_Clocks.HCLK_Frequency / 1000);
+  ADC_Ini();
+  GPIO_Ini();
+  USART_Ini();
+  while(1)
+  {
+  //GPIO_ToggleBits(GPIOC, GPIO_Pin_9);
+  printf("hello");
+  delay_ms(1000);
+  }
+  
+}
+
+
